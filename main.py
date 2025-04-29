@@ -1,7 +1,29 @@
 from fastapi import FastAPI
-from fastapi.params import Body
+from pydantic import BaseModel
+from typing import Optional
+from random import randrange
 
 app = FastAPI()
+
+my_post = [
+    {   
+        "id" : 1,
+        "title": "title of post 1",
+        "content" : "content of post 1"
+    },
+    {
+        "id" : 2,
+        "title" : "favourite foods",
+        "content" : "i like pizza"
+    }
+]
+
+class Post(BaseModel):
+    id : int = None
+    title : str
+    content : str
+    published : bool = False
+    rating : Optional[int] = None
 
 @app.get("/")
 def root():
@@ -9,25 +31,11 @@ def root():
 
 @app.get("/posts")
 def get_posts():
-    return {'data' : 'this is your posts'}
+    return {"data" : my_post}
 
-@app.post('/create_post')
-def create_posts(payload: dict = Body(...)):
-    '''
-    
-    1. Body(...) : Get this parameter from the request body, not from URL path, not from query parameters.
-        a.  Body(...) configures how FastAPI reads the request body.
-        
-        b.  When you do Body(...), you're telling FastAPI:
-                "Hey FastAPI, when a client sends a request, look into the HTTP body (the JSON), extract the data, and assign it to payload."
-            
-        c.  If you didn't use Body(...), FastAPI would look for query parameters by default, not the body!
-                Without Body(...), FastAPI would think you mean /create_post?payload=xyz, but you want JSON body, so you use Body(...)
-    
-    2. (...)  : Special Python object called Ellipsis — here it means "this field is REQUIRED".
-                Mandatory means if the client does not send a body, FastAPI will automatically return an error (HTTP 422 Unprocessable Entity).
-    
-    3. (:)    : Type hint seprator => payload : dict = Body(...)
-    
-    '''
-    return {'new_post' : f'title : {payload['title']} |||| content : {payload['content']}'}
+@app.post('/posts')
+def create_post(post : Post):
+    datas = post.model_dump()
+    datas['id'] = randrange(0,10000000)
+    my_post.append(datas)
+    return {"data" : datas}
