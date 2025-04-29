@@ -8,8 +8,8 @@ app = FastAPI()
 my_post = [
     {   
         "id" : 1,
-        "title": "title of post 1",
-        "content" : "content of post 1"
+        "title": "something great",
+        "content" : "you unlocked a card"
     },
     {
         "id" : 2,
@@ -30,11 +30,11 @@ class Post(BaseModel):
 def root():
     return {"message" : "welcome to my api! "}
 
-@app.get("/posts/{id}")     # id field here is a path parameter.
+@app.get("/posts/{id}")
 def get_post(id : int):
-    for post_data in my_post:
-        if post_data['id'] == id:
-            return post_data
+    post = find_post(id)
+    if post:
+        return post
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
                         detail=f"data not found with id : {id}")
 
@@ -48,3 +48,17 @@ def create_post(post : Post):
     datas['id'] = randrange(0,10000000)
     my_post.append(datas)
     return {"data" : datas}
+
+@app.delete('/posts/{id}')
+def delete_post(id : int):
+    post = find_post(id)
+    if post:
+        my_post.remove(post)
+        return {"data" : post}
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
+                        detail=f"data not found with id : {id}")
+
+def find_post(id : int) -> dict:
+    for post_data in my_post:
+        if post_data['id'] == id:
+            return post_data
