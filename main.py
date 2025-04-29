@@ -55,13 +55,15 @@ def delete_post(id : int):
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
                         detail=f"data not found with id : {id}")
 
-@app.put('posts/{id}')
+@app.put('/posts/{id}', status_code=status.HTTP_201_CREATED)
 def update_post(id : int, post : Post):
     print(post)
     post_idx = find_post(id)
+    new_content = post.model_dump()
     if post_idx is not None:
-        return {"message" : "updated Post"}
-
+        my_post[post_idx]['title'] = new_content['title']
+        my_post[post_idx]['content'] = new_content['content']
+        return my_post[post_idx]
 
 def find_post(id : int) -> int:
     '''
