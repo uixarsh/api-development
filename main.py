@@ -1,0 +1,33 @@
+from fastapi import FastAPI
+from fastapi.params import Body
+
+app = FastAPI()
+
+@app.get("/")
+def root():
+    return {"message" : "welcome to my api! "}
+
+@app.get("/posts")
+def get_posts():
+    return {'data' : 'this is your posts'}
+
+@app.post('/create_post')
+def create_posts(payload: dict = Body(...)):
+    '''
+    
+    1. Body(...) : Get this parameter from the request body, not from URL path, not from query parameters.
+        a.  Body(...) configures how FastAPI reads the request body.
+        
+        b.  When you do Body(...), you're telling FastAPI:
+                "Hey FastAPI, when a client sends a request, look into the HTTP body (the JSON), extract the data, and assign it to payload."
+            
+        c.  If you didn't use Body(...), FastAPI would look for query parameters by default, not the body!
+                Without Body(...), FastAPI would think you mean /create_post?payload=xyz, but you want JSON body, so you use Body(...)
+    
+    2. (...)  : Special Python object called Ellipsis — here it means "this field is REQUIRED".
+                Mandatory means if the client does not send a body, FastAPI will automatically return an error (HTTP 422 Unprocessable Entity).
+    
+    3. (:)    : Type hint seprator => payload : dict = Body(...)
+    
+    '''
+    return {'new_post' : f'title : {payload['title']} |||| content : {payload['content']}'}

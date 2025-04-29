@@ -1,0 +1,79 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.env/
+env/
+.venv/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+coverage.xml
+*.cover
+*.py,cover
+.cache
+pytest_cache/
+
+# MyPy and Pyright
+.mypy_cache/
+.pyright/
+
+# Pyre type checker
+.pyre/
+
+# Django stuff
+*.log
+local_settings.py
+
+# Flask stuff
+instance/
+.webassets-cache
+
+# VS Code settings
+.vscode/
+
+# PyCharm settings
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Other common ignores
+*.sqlite3
+*.db
+*.mo
+*.pot
+*.log
+*.bak
+*.tmp
+*.swp
+
+# If you have a `.env` or other secret files
+.env
+*.env
+
+# If you use poetry
+.poetry/
+
+# If you use pyenv
+.python-version
