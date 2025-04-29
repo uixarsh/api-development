@@ -1,7 +1,6 @@
 from fastapi import FastAPI, Response, status, HTTPException
 from pydantic import BaseModel
 from typing import Optional
-from random import randrange
 
 app = FastAPI()
 
@@ -25,40 +24,51 @@ class Post(BaseModel):
     published : bool = False
     rating : Optional[int] = None
 
-
 @app.get("/")
 def root():
     return {"message" : "welcome to my api! "}
-
-@app.get("/posts/{id}")
-def get_post(id : int):
-    post = find_post(id)
-    if post:
-        return post
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-                        detail=f"data not found with id : {id}")
 
 @app.get("/posts")
 def get_all_posts():
     return {"data" : my_post}
 
-@app.post('/posts', status_code=status.HTTP_201_CREATED)
-def create_post(post : Post):
-    datas = post.model_dump()
-    datas['id'] = randrange(0,10000000)
-    my_post.append(datas)
-    return {"data" : datas}
-
-@app.delete('/posts/{id}')
-def delete_post(id : int):
-    post = find_post(id)
-    if post:
-        my_post.remove(post)
-        return {"data" : post}
+@app.get("/posts/{id}")
+def get_post(id : int):
+    post_idx = find_post(id)
+    if post_idx is not None:
+        return my_post[post_idx]
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
                         detail=f"data not found with id : {id}")
 
-def find_post(id : int) -> dict:
-    for post_data in my_post:
+@app.post('/posts', status_code=status.HTTP_201_CREATED)
+def create_post(post : Post):
+    datas = post.model_dump()
+    my_post.append(datas)
+    return {"data" : datas}
+
+@app.delete('/posts/{id}', status_code=status.HTTP_204_NO_CONTENT)
+def delete_post(id : int):
+    post_idx = find_post(id)
+    if post_idx is not None:
+        my_post.pop(post_idx)
+        return 
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
+                        detail=f"data not found with id : {id}")
+
+@app.put('posts/{id}')
+def update_post(id : int, post : Post):
+    print(post)
+    post_idx = find_post(id)
+    if post_idx is not None:
+        return {"message" : "updated Post"}
+
+
+def find_post(id : int) -> int:
+    '''
+        Find the post via UNIQUE Identifier : id 
+        Returns the Index if found.
+    '''
+    for idx, post_data in enumerate(my_post):
         if post_data['id'] == id:
-            return post_data
+            return idx
+    return None
