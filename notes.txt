@@ -1,0 +1,44 @@
+----------------
+    Database    
+----------------
+1. Database is a collection of organized data that can be easily accessed and managed.
+2. We don't work or interact with databases directly.
+3. Instead we make use of software referred to as DBMS.
+
+Relational databases
+    |   MYSQL
+    |   POSTGRESQL
+    |   ORACLE
+    |   SQL SERVER
+
+NoSQL databases 
+    |   MongoDB
+    |   DynamoDB 
+    |   ORACLE
+    |   SQL SERVER
+
+
+-----------------------------------------
+    STRUCTURED QUERY LANGUAGE (SQL):    
+-----------------------------------------
+Language used to communicate with DBMS
+
+    -----------------------------------------
+    |   USER ----(SQL)----> DBMS ------> DB  |
+    |        <--------------                 |
+    -----------------------------------------
+
+
+----------------
+    POSTGRES    
+----------------
+Each instance of postgres can be carved into multiple seprate databases
+
+     App1               App2
+       |                 |
+    -------Postgres----------
+    | DB1               DB2 |
+    -------------------------
+
+By default every Postgres installation comes with one database already created called "postgres"
+This is important because Postgres requires you to specify the name of a databse to make a connection. So there needs to always be one database.
