@@ -22,7 +22,7 @@ class Post(BaseModel):
     id : int = None
     title : str
     content : str
-    published : bool = False
+    is_published : bool = False
 
 @app.get("/")
 def root():
@@ -45,7 +45,7 @@ def get_post(id : int):
 
 @app.post('/posts', status_code=status.HTTP_201_CREATED)
 def create_post(post : Post):
-    cursor.execute(""" INSERT INTO posts (title, content, is_published) VALUES (%s, %s, %s) RETURNING *""", (post.title, post.content, post.published,))
+    cursor.execute(""" INSERT INTO posts (title, content, is_published) VALUES (%s, %s, %s) RETURNING *""", (post.title, post.content, post.is_published,))
     new_post = cursor.fetchone()
     conn.commit()
     return {"data" : new_post}
@@ -61,6 +61,10 @@ def delete_post(id : int):
 
 @app.put('/posts/{id}', status_code=status.HTTP_201_CREATED)
 def update_post(id : int, post : Post):
-    new_content = post.model_dump()
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-                        detail=f"data not found with id : {id}")
+    cursor.execute(""" UPDATE posts SET title = %s, content = %s, is_published = %s WHERE id = %s RETURNING *""", (post.title, post.content, str(post.is_published), str(id),))
+    updated_post = cursor.fetchone()
+    conn.commit()
+    if updated_post is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
+                            detail=f"data not found with id : {id}")
+    return {'data' : updated_post}
