@@ -61,7 +61,7 @@ def delete_post(id : int):
 
 @app.put('/posts/{id}', status_code=status.HTTP_201_CREATED)
 def update_post(id : int, post : Post):
-    cursor.execute(""" UPDATE posts SET title = %s, content = %s, is_published = %s WHERE id = %s RETURNING *""", (post.title, post.content, str(post.is_published), str(id),))
+    cursor.execute(""" UPDATE posts SET title = %s, content = %s, is_published = %s WHERE id = %s RETURNING *""", (post.title, post.content, post.is_published, str(id),))
     updated_post = cursor.fetchone()
     conn.commit()
     if updated_post is None:
