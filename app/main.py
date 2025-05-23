@@ -24,6 +24,7 @@ class Post(BaseModel):
     content : str
     is_published : bool = False
 
+
 @app.get("/")
 def root():
     return {"message" : "welcome to the api! "}
