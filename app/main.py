@@ -1,77 +1,66 @@
 from fastapi import FastAPI, Response, status, HTTPException
 from pydantic import BaseModel
 from typing import Optional
+import psycopg2
+from psycopg2.extras import RealDictCursor
+import time
 
 app = FastAPI()
 
-my_post = [
-    {   
-        "id" : 1,
-        "title": "something great",
-        "content" : "you unlocked a card"
-    },
-    {
-        "id" : 2,
-        "title" : "favourite foods",
-        "content" : "i like pizza"
-    }
-]
+while True:
+    try:
+        conn = psycopg2.connect(host='localhost', database='fastapi', user='postgres', password='root', cursor_factory=RealDictCursor)
+        cursor = conn.cursor()
+        print("Database connection was successful !")
+        break
+    except Exception as error:
+        print("Connecting to database failed.", error)
+        time.sleep(5)
+
 
 class Post(BaseModel):
     id : int = None
     title : str
     content : str
     published : bool = False
-    rating : Optional[int] = None
 
 @app.get("/")
 def root():
-    return {"message" : "welcome to my api! "}
+    return {"message" : "welcome to the api! "}
 
 @app.get("/posts")
 def get_all_posts():
-    return {"data" : my_post}
+    cursor.execute("""SELECT * FROM posts""")
+    posts = cursor.fetchall()
+    return {"data" : posts}
 
 @app.get("/posts/{id}")
 def get_post(id : int):
-    post_idx = find_post(id)
-    if post_idx is not None:
-        return my_post[post_idx]
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-                        detail=f"data not found with id : {id}")
+    cursor.execute(""" SELECT * FROM posts WHERE id = %s """, (str(id),))
+    post = cursor.fetchone()
+    if post is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
+                            detail=f"data not found with id : {id}")
+    return {"data" : post}
 
 @app.post('/posts', status_code=status.HTTP_201_CREATED)
 def create_post(post : Post):
-    datas = post.model_dump()
-    my_post.append(datas)
-    return {"data" : datas}
+    cursor.execute(""" INSERT INTO posts (title, content, is_published) VALUES (%s, %s, %s) RETURNING *""", (post.title, post.content, post.published,))
+    new_post = cursor.fetchone()
+    conn.commit()
+    return {"data" : new_post}
 
 @app.delete('/posts/{id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(id : int):
-    post_idx = find_post(id)
-    if post_idx is not None:
-        my_post.pop(post_idx)
-        return 
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-                        detail=f"data not found with id : {id}")
+    cursor.execute(""" DELETE FROM posts WHERE id = %s RETURNING *""",(str(id),))
+    deleted_post = cursor.fetchone()
+    conn.commit()
+    if deleted_post is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
+                            detail=f"data not found with id : {id}")
 
 @app.put('/posts/{id}', status_code=status.HTTP_201_CREATED)
 def update_post(id : int, post : Post):
-    post_idx = find_post(id)
     new_content = post.model_dump()
-    if post_idx is not None:
-        my_post[post_idx]['title'] = new_content['title']
-        my_post[post_idx]['content'] = new_content['content']
-        return my_post[post_idx]
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
                         detail=f"data not found with id : {id}")
-    
-def find_post(id : int) -> int:
-    '''
-        Find the post via UNIQUE Identifier : id 
-        Returns the Index if found.
-    '''
-    for idx, post_data in enumerate(my_post):
-        if post_data['id'] == id:
-            return idx
-    return None
