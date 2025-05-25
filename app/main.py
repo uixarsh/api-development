@@ -38,7 +38,7 @@ def read_posts(
 def read_post(id: int, session: SessionDep):
     post = session.get(Post, id)
     if not post:
-        raise HTTPException(status_code=404, detail="Hero not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hero not found")
     return post
 
 # Update Post
