@@ -1,25 +1,22 @@
 from sqlmodel import Field, SQLModel
 
-class HeroBase(SQLModel):
-    name: str = Field(index=True)
-    age: int | None = Field(default=None, index=True)
-
-
-class Hero(HeroBase, table=True):
+class PostBase(SQLModel):
+    title: str = Field(default=None, index=True)
+    content: str = Field(default=None)
+    published: bool
+    
+class Post(PostBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    secret_name: str
-
-# Database will automatically create an Id, i don't need to create one
-# I just need to access data via id
-class HeroPublic(HeroBase):
+    
+class PostPublic(PostBase):
     id: int
 
+class PostCreate(PostBase):
+    title: str | None 
+    content: str | None
+    published : bool = False
 
-class HeroCreate(HeroBase):
-    secret_name: str
-
-
-class HeroUpdate(HeroBase):
-    name: str | None = None
-    age: int | None = None
-    secret_name: str | None = None
+class PostUpdate(PostBase):
+    title: str | None = None
+    content: str | None = None
+    published: str | None = None
