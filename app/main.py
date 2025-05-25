@@ -1,71 +1,63 @@
-from fastapi import FastAPI, Response, status, HTTPException
-from pydantic import BaseModel
-from typing import Optional
-import psycopg2
-from psycopg2.extras import RealDictCursor
-import time
+from fastapi import FastAPI, Query, HTTPException
+from sqlmodel import SQLModel, select
+from app.models import Hero, HeroUpdate
+from app.database import engine, SessionDep
+from typing import Annotated
 
 app = FastAPI()
 
-while True:
-    try:
-        conn = psycopg2.connect(host='localhost', database='fastapi', user='postgres', password='root', cursor_factory=RealDictCursor)
-        cursor = conn.cursor()
-        print("Database connection was successful !")
-        break
-    except Exception as error:
-        print("Connecting to database failed.", error)
-        time.sleep(5)
+# Create tables on startup
+@app.on_event("startup")
+def on_startup():
+    SQLModel.metadata.create_all(engine)
 
+# Creating a Hero User
+@app.post("/heroes/")
+def create_hero(hero: Hero, session: SessionDep) -> Hero:
+    session.add(hero)
+    session.commit()
+    session.refresh(hero)
+    return hero
 
-class Post(BaseModel):
-    id : int = None
-    title : str
-    content : str
-    is_published : bool = False
+# Returning all Heros
+@app.get("/heroes/")
+def read_heroes(
+    session: SessionDep,
+    offset: int = 0,
+    limit: Annotated[int, Query(le=100)] = 100,
+) -> list[Hero]:
+    heroes = session.exec(select(Hero).offset(offset).limit(limit)).all()
+    return heroes
 
+# Getting a Single Hero
+@app.get("/heroes/{hero_id}")
+def read_hero(hero_id: int, session: SessionDep) -> Hero:
+    hero = session.get(Hero, hero_id)
+    if not hero:
+        raise HTTPException(status_code=404, detail="Hero not found")
+    return hero
 
-@app.get("/")
-def root():
-    return {"message" : "welcome to the api! "}
+# Updating a Hero
+@app.put("/heroes/{hero_id}")
+def update_hero(hero_id: int, hero_update: HeroUpdate, session: SessionDep):
+    hero = session.get(Hero, hero_id)
+    if not hero:
+        raise HTTPException(status_code=404, detail="Hero not found")
 
-@app.get("/posts")
-def get_all_posts():
-    cursor.execute("""SELECT * FROM posts""")
-    posts = cursor.fetchall()
-    return {"data" : posts}
+    hero_data = hero_update.model_dump(exclude_unset=True)
+    hero.sqlmodel_update(hero_data)
 
-@app.get("/posts/{id}")
-def get_post(id : int):
-    cursor.execute(""" SELECT * FROM posts WHERE id = %s """, (str(id),))
-    post = cursor.fetchone()
-    if post is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-                            detail=f"data not found with id : {id}")
-    return {"data" : post}
+    session.add(hero)
+    session.commit()
+    session.refresh(hero)
+    return hero
 
-@app.post('/posts', status_code=status.HTTP_201_CREATED)
-def create_post(post : Post):
-    cursor.execute(""" INSERT INTO posts (title, content, is_published) VALUES (%s, %s, %s) RETURNING *""", (post.title, post.content, post.is_published,))
-    new_post = cursor.fetchone()
-    conn.commit()
-    return {"data" : new_post}
-
-@app.delete('/posts/{id}', status_code=status.HTTP_204_NO_CONTENT)
-def delete_post(id : int):
-    cursor.execute(""" DELETE FROM posts WHERE id = %s RETURNING *""",(str(id),))
-    deleted_post = cursor.fetchone()
-    conn.commit()
-    if deleted_post is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-                            detail=f"data not found with id : {id}")
-
-@app.put('/posts/{id}', status_code=status.HTTP_201_CREATED)
-def update_post(id : int, post : Post):
-    cursor.execute(""" UPDATE posts SET title = %s, content = %s, is_published = %s WHERE id = %s RETURNING *""", (post.title, post.content, post.is_published, str(id),))
-    updated_post = cursor.fetchone()
-    conn.commit()
-    if updated_post is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-                            detail=f"data not found with id : {id}")
-    return {'data' : updated_post}
+# Deleting a Hero
+@app.delete("/heroes/{hero_id}")
+def delete_hero(hero_id: int, session: SessionDep):
+    hero = session.get(Hero, hero_id)
+    if not hero:
+        raise HTTPException(status_code=404, detail="Hero not found")
+    session.delete(hero)
+    session.commit()
+    return {"ok": True}

@@ -1,18 +1,14 @@
-from sqlmodel import Field, Session, SQLModel, create_engine, select
+from sqlmodel import create_engine, Session
 from typing import Annotated
-from fastapi import Depends, FastAPI
-
-
-# DATABASE_URL = 'postgresql://<username>:<password>@<ip-address/hostname>/<database_name>'
+from sqlmodel import Session
+from fastapi import Depends
 
 DATABASE_URL = 'postgresql://postgres:root@localhost/fastapi'
-engine = create_engine(DATABASE_URL)
 
-def create_db_and_tables():
-    SQLModel.metadata.create_all(engine)
+engine = create_engine(DATABASE_URL, echo=True)
 
 def get_session():
     with Session(engine) as session:
         yield session
-
+        
 SessionDep = Annotated[Session, Depends(get_session)]
