@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Query, HTTPException, status
 from sqlmodel import SQLModel, select
-from app.models import Post, PostPublic, PostCreate, PostUpdate
+from app.schemas import Post, PostPublic, PostCreate, PostUpdate
 from app.database import engine, SessionDep
 from typing import Annotated
 
