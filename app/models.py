@@ -4,16 +4,6 @@ import datetime
 
 '''
 POST TABLE
------------
-
-CREATE TABLE post (
-    title VARCHAR NOT NULL,
-    content VARCHAR NOT NULL,
-    published BOOLEAN,
-    id SERIAL NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-    PRIMARY KEY (id)
-)
 '''
 class PostBase(SQLModel):
     title: str = Field(default=None, index=True)
@@ -39,18 +29,6 @@ class UpdatePost(PostBase):
 
 '''
 USER TABLE
------------
-
-CREATE TABLE "user" (
-    email VARCHAR(255) NOT NULL,
-    is_active BOOLEAN NOT NULL,
-    is_superuser BOOLEAN NOT NULL,
-    full_name VARCHAR(255),
-    id SERIAL NOT NULL,
-    password VARCHAR NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-    PRIMARY KEY (id)
-)
 '''
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
@@ -71,8 +49,7 @@ class UserPublic(UserBase):
 
 
 '''
-AUTHENTICATION TABLE
------------
+AUTHENTICATION
 '''
 class UserLogin(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
