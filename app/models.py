@@ -68,3 +68,12 @@ class CreateUser(UserBase):
 
 class UserPublic(UserBase):
     id : int
+
+
+'''
+AUTHENTICATION TABLE
+-----------
+'''
+class UserLogin(SQLModel):
+    email: EmailStr = Field(unique=True, index=True, max_length=255)
+    password : str
