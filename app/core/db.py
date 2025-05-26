@@ -5,7 +5,7 @@ from fastapi import Depends
 
 DATABASE_URL = 'postgresql://postgres:root@localhost/fastapi'
 
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL)
 
 
 def get_session():

@@ -4,10 +4,13 @@ from app.models import Post, PostPublic, CreatePost, UpdatePost
 from app.core.db import SessionDep
 from typing import Annotated
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/posts",
+    tags=['Posts']
+)
 
 # Create Post
-@router.post("/posts/", response_model=PostPublic, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=PostPublic, status_code=status.HTTP_201_CREATED)
 def create_post(post: CreatePost, session: SessionDep):
     new_post = Post.model_validate(post)
     session.add(new_post)
@@ -16,7 +19,7 @@ def create_post(post: CreatePost, session: SessionDep):
     return new_post
 
 # Read Posts
-@router.get("/posts/", response_model=list[PostPublic])
+@router.get("/", response_model=list[PostPublic])
 def read_posts(
     session: SessionDep,
     offset: int = 0,
@@ -29,7 +32,7 @@ def read_posts(
     return posts
 
 # Read One Post
-@router.get("/posts/{id}", response_model=PostPublic)
+@router.get("/{id}", response_model=PostPublic)
 def read_post(id: int, session: SessionDep):
     post = session.get(Post, id)
     if not post:
@@ -37,7 +40,7 @@ def read_post(id: int, session: SessionDep):
     return post
 
 # Update Post
-@router.put("/posts/{id}", response_model=PostPublic, status_code= status.HTTP_201_CREATED)
+@router.put("/{id}", response_model=PostPublic, status_code= status.HTTP_201_CREATED)
 def update_post(id: int, update_post: UpdatePost, session: SessionDep):
     post = session.get(Post, id)
     if not post:
@@ -50,7 +53,7 @@ def update_post(id: int, update_post: UpdatePost, session: SessionDep):
     return post
 
 # Delete Post
-@router.delete("/posts/{id}")
+@router.delete("/{id}")
 def delete_post(id: int, session: SessionDep, status_code=status.HTTP_204_NO_CONTENT):
     post = session.get(Post, id)
     if not post:

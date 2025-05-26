@@ -5,10 +5,13 @@ from app.core.db import SessionDep
 from typing import Annotated
 from app.utils import get_pwd_hash
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/users",
+    tags=['Users']
+)
 
 # Create User
-@router.post("/users/", response_model=UserPublic, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=UserPublic, status_code=status.HTTP_201_CREATED)
 def create_user(user: CreateUser, session: SessionDep):
     user.password = get_pwd_hash(user.password)
     new_user = User.model_validate(user)
@@ -18,7 +21,7 @@ def create_user(user: CreateUser, session: SessionDep):
     return new_user
 
 # Read Users
-@router.get("/users/", response_model=list[UserPublic])
+@router.get("/", response_model=list[UserPublic])
 def read_users(
     session: SessionDep,
     offset: int = 0,
@@ -31,7 +34,7 @@ def read_users(
     return users
 
 # Read User
-@router.get("/users/{id}", response_model=UserPublic)
+@router.get("/{id}", response_model=UserPublic)
 def read_user(id: int, session: SessionDep):
     user = session.get(User, id)
     if not user:
