@@ -1,7 +1,7 @@
 from fastapi import Query, HTTPException, status, APIRouter
 from sqlmodel import select
-from app.schemas import Post, PostPublic, CreatePost, UpdatePost
-from app.database import SessionDep
+from app.models import Post, PostPublic, CreatePost, UpdatePost
+from app.core.db import SessionDep
 from typing import Annotated
 
 router = APIRouter()

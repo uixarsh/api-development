@@ -1,7 +1,7 @@
 from fastapi import Query, HTTPException, status, APIRouter
 from sqlmodel import select
-from app.schemas import User, CreateUser, UserPublic
-from app.database import SessionDep
+from app.models import User, CreateUser, UserPublic
+from app.core.db import SessionDep
 from typing import Annotated
 from app.utils import get_pwd_hash
 
