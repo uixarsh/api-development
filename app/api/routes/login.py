@@ -5,6 +5,7 @@ from sqlmodel import select
 from app.core.security import verify_pwd
 from app.core.security import create_access_token
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
+from datetime import timedelta
 
 router = APIRouter(
     tags=['Login']
@@ -28,5 +29,9 @@ def login(session: SessionDep , user_credentials : OAuth2PasswordRequestForm = D
     if not verify_pwd(user_credentials.password, session_user.password):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid Credentials")
     
-    access_token = create_access_token(data={"user_id": session_user.id})
-    return {"access_token": access_token, "token_type" : "bearer"}
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    return Token(
+        access_token=create_access_token(session_user.id, 
+                                         expires_delta=access_token_expires)
+    )
