@@ -3,7 +3,7 @@ from sqlmodel import select
 from app.models import User, CreateUser, UserPublic
 from app.core.db import SessionDep
 from typing import Annotated
-from app.utils import get_pwd_hash
+from app.core.security import get_pwd_hash
 
 router = APIRouter(
     prefix="/users",
