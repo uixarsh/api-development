@@ -1,8 +1,9 @@
-from fastapi import Query, HTTPException, status, APIRouter
+from fastapi import Query, HTTPException, status, APIRouter, Depends
 from sqlmodel import select
 from app.models import Post, PostPublic, CreatePost, UpdatePost
 from app.core.db import SessionDep
 from typing import Annotated
+from app.api.routes.oauth2 import get_current_user
 
 router = APIRouter(
     prefix="/posts",
@@ -11,7 +12,7 @@ router = APIRouter(
 
 # Create Post
 @router.post("/", response_model=PostPublic, status_code=status.HTTP_201_CREATED)
-def create_post(post: CreatePost, session: SessionDep):
+def create_post(post: CreatePost, session: SessionDep, user_id : int = Depends(get_current_user)):
     new_post = Post.model_validate(post)
     session.add(new_post)
     session.commit()
@@ -24,6 +25,7 @@ def read_posts(
     session: SessionDep,
     offset: int = 0,
     limit: Annotated[int, Query(le=100)] = 100,
+    user_id : int = Depends(get_current_user)
 ):
     posts = session.exec(select(Post).offset(offset).limit(limit)).all()
     if not posts:
@@ -33,7 +35,7 @@ def read_posts(
 
 # Read One Post
 @router.get("/{id}", response_model=PostPublic)
-def read_post(id: int, session: SessionDep):
+def read_post(id: int, session: SessionDep, user_id : int = Depends(get_current_user)):
     post = session.get(Post, id)
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
@@ -41,7 +43,7 @@ def read_post(id: int, session: SessionDep):
 
 # Update Post
 @router.put("/{id}", response_model=PostPublic, status_code= status.HTTP_201_CREATED)
-def update_post(id: int, update_post: UpdatePost, session: SessionDep):
+def update_post(id: int, update_post: UpdatePost, session: SessionDep, user_id : int = Depends(get_current_user)):
     post = session.get(Post, id)
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data not found")
@@ -54,7 +56,7 @@ def update_post(id: int, update_post: UpdatePost, session: SessionDep):
 
 # Delete Post
 @router.delete("/{id}")
-def delete_post(id: int, session: SessionDep, status_code=status.HTTP_204_NO_CONTENT):
+def delete_post(id: int, session: SessionDep, status_code=status.HTTP_204_NO_CONTENT, user_id : int = Depends(get_current_user)):
     post = session.get(Post, id)
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"data not found with id : {id}")

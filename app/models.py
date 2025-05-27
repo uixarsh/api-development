@@ -1,6 +1,7 @@
 from sqlmodel import Field, SQLModel, Column, DateTime, func
 from pydantic import EmailStr
 import datetime
+from typing import Optional
 
 '''
 POST TABLE
@@ -54,3 +55,12 @@ AUTHENTICATION
 class UserLogin(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
     password : str
+
+# JSON payload containing access token
+class Token(SQLModel):
+    access_token : str
+    token_type : str = "bearer"
+
+# Contents of JWT token
+class TokenPayload(SQLModel):
+    sub: Optional[str] | None = None
