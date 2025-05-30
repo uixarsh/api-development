@@ -5,6 +5,7 @@ from sqlmodel import SQLModel
 from fastapi import FastAPI
 from app.api.main import api_router
 from app.core.db import engine
+from app.core.config import settings
 
 app = FastAPI()
 

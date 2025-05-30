@@ -9,11 +9,10 @@ from typing import Annotated
 from sqlmodel import Session
 from app.core.db import engine
 from pydantic import ValidationError
+from app.core import security
+from app.core.config import settings
 
 oauth_scheme = OAuth2PasswordBearer(tokenUrl='login')
-SECRET_KEY = "GriUtYd3xpyV22L5tkSV3SGk5ZnzBwczNX7Hwxe9b4A"
-ALGORITHM = "HS256"
-
 
 def get_db() -> Generator[Session, None, None]:
     with Session(engine) as session:
@@ -26,7 +25,7 @@ TokenDep = Annotated[str, Depends(oauth_scheme)]
 def get_current_user(session: SessionDep, token: TokenDep) -> User:
     try:
         payload = jwt.decode(
-            token, SECRET_KEY, algorithms=[ALGORITHM]
+            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
         )
         token_data = TokenPayload(**payload)
     except (InvalidTokenError, ValidationError):

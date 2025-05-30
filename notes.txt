@@ -42,3 +42,14 @@ Each instance of postgres can be carved into multiple seprate databases
 
 By default every Postgres installation comes with one database already created called "postgres"
 This is important because Postgres requires you to specify the name of a databse to make a connection. So there needs to always be one database.
+
+
+
+-----------------------------------------
+ACCESS ENVIRONMENT VARIABLE
+-------------------------------------
+
+import os
+
+path = os.getenv("Path")
+print(path)
