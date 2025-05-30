@@ -12,7 +12,8 @@ from pydantic import ValidationError
 from app.core import security
 from app.core.config import settings
 
-oauth_scheme = OAuth2PasswordBearer(tokenUrl='login')
+oauth_scheme = OAuth2PasswordBearer(
+    tokenUrl=f"{settings.API_V1_STR}/login")
 
 def get_db() -> Generator[Session, None, None]:
     with Session(engine) as session:
