@@ -14,6 +14,7 @@ class PostBase(SQLModel):
 class Post(PostBase, table=True):
     id: int = Field(default=None, primary_key=True)
     created_at: datetime.datetime = Field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc), sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))
+    owner_id : int = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE")
 
 class PostPublic(PostBase):
     id: int
