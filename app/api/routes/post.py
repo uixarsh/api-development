@@ -2,8 +2,7 @@ from fastapi import Query, HTTPException, status, APIRouter, Depends
 from sqlmodel import select
 from app.models import Post, PostPublic, CreatePost, UpdatePost
 from app.api.deps import CurrentUser, SessionDep
-from typing import Annotated
-
+from typing import Annotated, Optional
 
 router = APIRouter(
     prefix="/posts",
@@ -28,8 +27,9 @@ def read_posts(
     current_user : CurrentUser,
     offset: int = 0,
     limit: Annotated[int, Query(le=100)] = 100,
+    search : Optional[str] = ""
     ):
-    posts = session.exec(select(Post).offset(offset).limit(limit)).all()
+    posts = session.exec(select(Post).where((Post.owner_id == current_user.id) & (Post.title.contains(search))).offset(offset).limit(limit)).all()
     if not posts:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
                             detail=f"data not found")
@@ -41,7 +41,7 @@ def read_post(id: int,
               session: SessionDep, 
               current_user : CurrentUser):
     post = session.get(Post, id)
-    
+
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
     
