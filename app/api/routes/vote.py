@@ -1,5 +1,5 @@
 from fastapi import Query, HTTPException, status, APIRouter
-from app.models import Vote, VotePublic, VoteRequest
+from app.models import Vote, VotePublic, VoteRequest, Post
 from app.api.deps import CurrentUser, SessionDep
 from sqlmodel import select
 
@@ -13,6 +13,11 @@ router = APIRouter(
 def vote(vote: VoteRequest, 
                 session: SessionDep, 
                 current_user : CurrentUser):
+    
+    post = session.exec(select(Post).where(Post.id == vote.post_id)).one_or_none()
+    if not post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with id :{vote.post_id} doesn't exists.")
+    
     vote_query = session.exec(select(Vote).where((Vote.post_id == vote.post_id), (Vote.user_id == current_user.id)))
     found_vote = vote_query.one_or_none()
     if vote.dir == 1:
