@@ -2,7 +2,7 @@ from sqlmodel import Field, SQLModel, Column, DateTime, func, Relationship
 from pydantic import EmailStr
 import datetime
 from typing import Optional
-
+from pydantic.types import conint
 
 '''
 USER TABLE
@@ -55,6 +55,23 @@ class UpdatePost(PostBase):
     content: str | None = None
     published: bool | None = None
 
+
+'''
+VOTE TABLE
+'''
+class VoteBase(SQLModel):
+    user_id : int = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE", primary_key=True)
+    post_id : int = Field(foreign_key="post.id", nullable=False, ondelete="CASCADE", primary_key=True)
+
+class Vote(VoteBase, table=True):
+    pass
+
+class VoteRequest(SQLModel):
+    post_id: int
+    dir: conint(le=1)  # 1 to vote, 0 to unvote
+
+class VotePublic(SQLModel):
+    message: str
 
 
 '''

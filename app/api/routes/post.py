@@ -29,7 +29,7 @@ def read_posts(
     limit: Annotated[int, Query(le=100)] = 100,
     search : Optional[str] = ""
     ):
-    posts = session.exec(select(Post).where((Post.owner_id == current_user.id) & (Post.title.contains(search))).offset(offset).limit(limit)).all()
+    posts = session.exec(select(Post).where((Post.title.contains(search))).offset(offset).limit(limit)).all()       #(Post.owner_id == current_user.id) &
     if not posts:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
                             detail=f"data not found")
