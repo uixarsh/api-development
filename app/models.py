@@ -71,7 +71,8 @@ class VoteRequest(SQLModel):
     dir: conint(le=1)  # 1 to vote, 0 to unvote
 
 class VotePublic(SQLModel):
-    message: str
+    Post : Post
+    votes : int
 
 
 '''

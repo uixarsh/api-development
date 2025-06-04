@@ -1,6 +1,6 @@
 from fastapi import Query, HTTPException, status, APIRouter, Depends
-from sqlmodel import select
-from app.models import Post, PostPublic, CreatePost, UpdatePost
+from sqlmodel import select, func
+from app.models import Post, PostPublic, CreatePost, UpdatePost, Vote, VotePublic
 from app.api.deps import CurrentUser, SessionDep
 from typing import Annotated, Optional
 
@@ -21,7 +21,7 @@ def create_post(post: CreatePost,
     return new_post
 
 # Read Posts
-@router.get("/", response_model=list[PostPublic])
+@router.get("/", response_model=list[VotePublic])
 def read_posts(
     session: SessionDep,
     current_user : CurrentUser,
@@ -29,18 +29,24 @@ def read_posts(
     limit: Annotated[int, Query(le=100)] = 100,
     search : Optional[str] = ""
     ):
-    posts = session.exec(select(Post).where((Post.title.contains(search))).offset(offset).limit(limit)).all()       #(Post.owner_id == current_user.id) &
+    
+    statement = select(Post, func.count(Vote.post_id).label('votes')).join(Vote, Vote.post_id == Post.id, isouter=True).group_by(Post.id).where(((Post.owner_id == current_user.id) & Post.title.contains(search))).offset(offset).limit(limit)   # Left outer join
+    posts = session.exec(statement).all()
     if not posts:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
                             detail=f"data not found")
+    
     return posts
 
 # Read One Post
-@router.get("/{id}", response_model=PostPublic)
+@router.get("/{id}", response_model=VotePublic)
 def read_post(id: int, 
               session: SessionDep, 
               current_user : CurrentUser):
-    post = session.get(Post, id)
+    statement = select(Post, func.count(Vote.post_id).label('votes')).join(Vote, Vote.post_id == Post.id, isouter=True).group_by(Post.id).where(Post.id == id)
+    result = session.exec(statement).one_or_none()
+    
+    post, votes = result   
 
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
@@ -48,7 +54,7 @@ def read_post(id: int,
     if post.owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not Authorized to perform requested action!")
     
-    return post
+    return result
 
 # Update Post
 @router.put("/{id}", response_model=PostPublic, status_code= status.HTTP_201_CREATED)

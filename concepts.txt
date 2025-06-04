@@ -31,3 +31,44 @@ CONCEPT 2:
 -----------------------------------
 
 Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+
+
+
+
+
+
+
+CONCEPT 3:
+-----------------------------------
+
+[
+    {
+        "title": "Welcome asdf",
+        "published": false,
+        "id": 4,
+        "content": "hi, there this is Arsh Singhal",
+        "created_at": "2025-05-30T11:10:06.211344+05:30",
+        "owner_id": 3,
+        "votes": 2
+    },
+    {
+        "title": "Welcome ",
+        "published": false,
+        "id": 2,
+        "content": "all great people here around available. ",
+        "created_at": "2025-05-30T10:59:27.403066+05:30",
+        "owner_id": 1,
+        "votes": 3
+    },
+    {
+        "title": "Welcome aqrsdf",
+        "published": false,
+        "id": 5,
+        "content": "all great people here around available. ",
+        "created_at": "2025-05-30T11:50:31.610152+05:30",
+        "owner_id": 3,
+        "votes": 3
+    }
+]
